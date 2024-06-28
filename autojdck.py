@@ -47,11 +47,25 @@ import platform  #判断系统类型
 import zipfile  #用于解压文件
 from datetime import datetime #获取时间
 
+import wx_send
 
+MSG = ""
+
+## 自定义输出函数+发送消息
+def print_send(*args, **kwargs):
+    global MSG
+    print(*args, **kwargs)
+
+    # 将输出的内容叠加到全局变量output_buffer上
+    MSG += ' '.join([str(arg) for arg in args]) + '\n'
+    # 返回输出的内容
+    return MSG
 
 
 async def print_message(message):     #初始化异步print
+    global MSG
     print(message)
+    MSG += message
 
 async def ifconfigfile():                           #判断有没有配置文件
     global configfile            #配置文件全局变量
@@ -535,6 +549,7 @@ async def main():  # 打开并读取配置文件，主程序
     os.remove('image.png') if os.path.exists('image.png') else None     #删除缓存照片
     os.remove('template.png') if os.path.exists('template.png') else None     #删除缓存照片
     await print_message('完成全部登录')
+    wx_send.WxPusher_send_message("青龙登陆",f"{MSG}\n")
     await asyncio.sleep(10)  # 等待10秒，等待
 
 asyncio.get_event_loop().run_until_complete(main())  #使用异步I/O循环运行main()函数，启动整个自动登录和滑块验证流程。
